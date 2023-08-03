@@ -107,3 +107,16 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 	return i
 }
+
+func (app *application) background(fn func()) {
+	go func() {
+		defer func() {
+			// Run a deferred function which uses recover() to catch any panic, and log an
+			// error message instead of terminating the application.
+			if err := recover(); err != nil {
+				app.logger.PrintError(fmt.Errorf("%s", err), nil)
+			}
+		}()
+		fn()
+	}()
+}
